@@ -36,3 +36,33 @@ if page.total !== 1
         if globalPageType === 'home'
           - options.format = 'page/%d/#content-inner'
         !=paginator(options)
+        if ['category', 'tag', 'home', 'archive'].includes(globalPageType)
+          input#textnumer(oninput="value=value.replace(/[^0-9]/g,'')" maxlength="3" onkeyup='this.value=this.value.replace(/[^u4e00-u9fa5w]/g,"")')
+          button#textbtn(type="button" onclick="handlePageJump()") 跳转
+      if ['category', 'tag', 'home', 'archive'].includes(globalPageType)
+        .js-css
+          script.
+            function handlePageJump() {
+              const inputVal = document.getElementById('textnumer').value;
+              const pageNum = parseInt(inputVal);
+              if (isNaN(pageNum) || pageNum < 1) return false;
+              const pageElements = document.querySelectorAll('.page-number');
+              const lastPage = pageElements.length > 0 ? 
+                parseInt(pageElements[pageElements.length-1].textContent) : 1;
+              const finalPage = Math.min(Math.max(1, pageNum), lastPage);
+              const pathMap = {
+                home: '/',
+                category: '/categories/' + window.location.pathname.split('/')[2] + '/',
+                tag: '/tags/' + window.location.pathname.split('/')[2] + '/',
+                archive: '/archives/'
+              };
+              const basePath = pathMap['#{globalPageType}'];
+              const targetUrl = finalPage === 1 ? basePath : basePath + 'page/' + finalPage + '/';
+              window.location.href = targetUrl;
+              return false;
+            }
+          style.
+            #pagination .pagination .extend { display: none !important; }
+            #pagination .pagination { line-height: 3; }
+            #textbtn { cursor: pointer; }
+            .pagination > *:not(.space) { -webkit-box-shadow: var(--card-box-shadow) !important; box-shadow: var(--card-box-shadow) !important; color: #728297; }
